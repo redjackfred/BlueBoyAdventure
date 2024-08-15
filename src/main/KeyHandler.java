@@ -4,7 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
-    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
+    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed, shotKeyPressed;
     boolean showDebugText = false;
     GamePanel gp;
 
@@ -131,6 +131,9 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_T:
                 showDebugText = !showDebugText;
                 break;
+            case KeyEvent.VK_F:
+                shotKeyPressed = true;
+                break;
             case KeyEvent.VK_R:
                 gp.tileManager.loadMap("maps/worldmap.txt");
                 break;
@@ -153,6 +156,37 @@ public class KeyHandler implements KeyListener {
         if(code == KeyEvent.VK_C){
             gp.gameState = gp.playState;
         }
+        if(code == KeyEvent.VK_W){
+            gp.ui.slotRow--;
+            gp.playSE(9);
+            if(gp.ui.slotRow < 0){
+                gp.ui.slotRow = 3;
+            }
+        }
+        if(code == KeyEvent.VK_A){
+            gp.ui.slotCol--;
+            gp.playSE(9);
+            if(gp.ui.slotCol < 0){
+                gp.ui.slotCol = 4;
+            }
+        }
+        if(code == KeyEvent.VK_S){
+            gp.ui.slotRow++;
+            gp.playSE(9);
+            if(gp.ui.slotRow > 3){
+                gp.ui.slotRow = 0;
+            }
+        }
+        if(code == KeyEvent.VK_D){
+            gp.ui.slotCol++;
+            gp.playSE(9);
+            if(gp.ui.slotCol > 4){
+                gp.ui.slotCol = 0;
+            }
+        }
+        if(code == KeyEvent.VK_ENTER){
+            gp.player.selectItem();
+        }
     }
 
     @Override
@@ -170,6 +204,9 @@ public class KeyHandler implements KeyListener {
                 break;
             case KeyEvent.VK_D:
                 rightPressed = false;
+                break;
+            case KeyEvent.VK_F:
+                shotKeyPressed = false;
                 break;
             case KeyEvent.VK_ENTER:
                 enterPressed = false;

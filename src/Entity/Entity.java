@@ -36,12 +36,14 @@ public abstract class Entity {
     public int invincibleCounter = 0;
     int dyingCounter = 0;
     int hpBarCounter = 0;
+    int shotAvailableCounter = 0;
 
     // Character attributes
-    public int type; // 0 = player, 1 = npc, 2 = monster
     public String name;
     public int speed;
     public int maxLife;
+    public int mana;
+    public int maxMana;
     public int life;
     public int level;
     public int strength;
@@ -53,10 +55,23 @@ public abstract class Entity {
     public int coin;
     public Entity currentWeapon;
     public Entity currentShield;
+    public Projectile projectile;
 
     // Item attributes
     public int attackValue;
     public int defenseValue;
+    public String description = "";
+    public int useCost;
+
+    // Type
+    public int type; // 0 = player, 1 = npc, 2 = monster
+    public final int type_player = 0;
+    public final int type_npc = 1;
+    public final int type_monster = 2;
+    public final int type_sword = 3;
+    public final int type_axe = 4;
+    public final int type_shield = 5;
+    public final int type_consumable = 6;
 
     public Entity(GamePanel gp){
         this.gp = gp;
@@ -99,6 +114,7 @@ public abstract class Entity {
         }
     }
 
+    public void use(Entity entity){}
     public void update(){
         setAction();
         collisionOn = false;
@@ -107,7 +123,7 @@ public abstract class Entity {
         gp.collisionChecker.checkEntity(this, gp.npc);
         gp.collisionChecker.checkEntity(this, gp.monster);
         boolean contactPlayer = gp.collisionChecker.checkPlayer(this);
-        if(this.type == 2 && contactPlayer && !gp.player.invincible){
+        if(this.type == type_monster && contactPlayer && !gp.player.invincible){
             gp.playSE(6);
             int damage = attack - gp.player.defense;
             if(damage < 0){
@@ -199,6 +215,9 @@ public abstract class Entity {
                 g2.setColor(new Color(35, 35, 35));
                 g2.fillRect(screenX - 2, screenY - 18, gp.tileSize + 4, 14);
                 g2.setColor(new Color(255, 0, 30));
+                if(hpBarValue < 0){
+                    hpBarValue = 0;
+                }
                 g2.fillRect(screenX, screenY - 15, (int)hpBarValue, 10);
 
                 hpBarCounter++;
@@ -243,7 +262,6 @@ public abstract class Entity {
         }else if(dyingCounter < i * 8){
             changeAlpha(g2, 1F);
         }else{
-            dying = false;
             alive = false;
         }
     }
