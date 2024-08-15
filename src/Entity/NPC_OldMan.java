@@ -1,10 +1,5 @@
 package Entity;
-
 import main.GamePanel;
-import main.UtilityTool;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.util.Random;
 
 public class NPC_OldMan extends Entity{
@@ -13,6 +8,14 @@ public class NPC_OldMan extends Entity{
 
         direction = "down";
         speed = 1;
+        collision = true;
+
+        solidArea.x = 0;
+        solidArea.y = 16;
+        solidArea.width = 48;
+        solidArea.height = 32;
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
         getImage();
         setDialogue();
     }
@@ -51,13 +54,13 @@ public class NPC_OldMan extends Entity{
     }
 
     public void getImage(){
-        up1 = setUp("npc/oldman_up_1");
-        up2 = setUp("npc/oldman_up_2");
-        down1 = setUp("npc/oldman_down_1");
-        down2 = setUp("npc/oldman_down_2");
-        left1 = setUp("npc/oldman_left_1");
-        left2 = setUp("npc/oldman_left_2");
-        right1 = setUp("npc/oldman_right_1");
-        right2 = setUp("npc/oldman_right_2");
+        up1 = setUp("npc/oldman_up_1", gp.tileSize, gp.tileSize);
+        up2 = setUp("npc/oldman_up_2", gp.tileSize, gp.tileSize);
+        down1 = setUp("npc/oldman_down_1", gp.tileSize, gp.tileSize);
+        down2 = setUp("npc/oldman_down_2", gp.tileSize, gp.tileSize);
+        left1 = setUp("npc/oldman_left_1", gp.tileSize, gp.tileSize);
+        left2 = setUp("npc/oldman_left_2", gp.tileSize, gp.tileSize);
+        right1 = setUp("npc/oldman_right_1", gp.tileSize, gp.tileSize);
+        right2 = setUp("npc/oldman_right_2", gp.tileSize, gp.tileSize);
     }
 }

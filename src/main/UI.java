@@ -1,14 +1,12 @@
 package main;
 
+import Entity.Entity;
 import object.OBJ_Heart;
-import object.OBJ_Key;
-import object.SuperObject;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DecimalFormat;
 
 public class UI {
     GamePanel gamePanel;
@@ -38,7 +36,7 @@ public class UI {
         }
 
         // Create HUD object
-        SuperObject heart = new OBJ_Heart(gamePanel);
+        Entity heart = new OBJ_Heart(gamePanel);
         heart_full = heart.image;
         heart_half = heart.image2;
         heart_blank = heart.image3;
@@ -73,8 +71,25 @@ public class UI {
         int x = gamePanel.tileSize / 2;
         int y = gamePanel.tileSize / 2;
         int i = 0;
+        // Draw Max Life
         while(i < gamePanel.player.maxLife / 2){
             g2.drawImage(heart_blank, x, y, null);
+            i++;
+            x += gamePanel.tileSize;
+        }
+
+        // Reset
+        x = gamePanel.tileSize / 2;
+        y = gamePanel.tileSize / 2;
+        i = 0;
+
+        // Draw current life
+        while(i < gamePanel.player.life){
+            g2.drawImage(heart_half, x, y, null);
+            i++;
+            if(i < gamePanel.player.life){
+                g2.drawImage(heart_full, x, y, null);
+            }
             i++;
             x += gamePanel.tileSize;
         }
