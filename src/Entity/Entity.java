@@ -43,6 +43,20 @@ public abstract class Entity {
     public int speed;
     public int maxLife;
     public int life;
+    public int level;
+    public int strength;
+    public int dexterity;
+    public int attack;
+    public int defense;
+    public int exp;
+    public int nextLevelExp;
+    public int coin;
+    public Entity currentWeapon;
+    public Entity currentShield;
+
+    // Item attributes
+    public int attackValue;
+    public int defenseValue;
 
     public Entity(GamePanel gp){
         this.gp = gp;
@@ -95,7 +109,11 @@ public abstract class Entity {
         boolean contactPlayer = gp.collisionChecker.checkPlayer(this);
         if(this.type == 2 && contactPlayer && !gp.player.invincible){
             gp.playSE(6);
-            gp.player.life -= 1;
+            int damage = attack - gp.player.defense;
+            if(damage < 0){
+                damage = 0;
+            }
+            gp.player.life -= damage;
             gp.player.invincible = true;
         }
 

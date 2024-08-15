@@ -2,6 +2,8 @@ package Entity;
 import main.GamePanel;
 import main.KeyHandler;
 import main.UtilityTool;
+import object.OBJ_Shield_Wood;
+import object.OBJ_Sword_Normal;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,6 +16,7 @@ public class Player extends Entity{
     public final int screenX;
     public final int screenY;
     int standCounter = 0;
+    public boolean attackCanceled = false;
 
     public Player(GamePanel gamePanel, KeyHandler keyHandler){
         super(gamePanel);
@@ -47,8 +50,26 @@ public class Player extends Entity{
         direction = "down";
 
         // Player status
+        level = 1;
         maxLife = 6;
         life = maxLife;
+        strength = 1; // The more strength he has, the more damage he gives.
+        dexterity = 1; // The more dexterity he has, the less he receives.
+        exp = 0;
+        nextLevelExp = 5;
+        coin = 0;
+        currentWeapon = new OBJ_Sword_Normal(gp);
+        currentShield = new OBJ_Shield_Wood(gp);
+        attack = getAttack(); // The total attack value is decided by strength and weapon
+        defense = getDefense();  // The total defense value is decided by dexterity and shield
+    }
+
+    private int getDefense() {
+        return attack = strength * currentWeapon.attackValue;
+    }
+
+    private int getAttack() {
+        return defense = dexterity * currentWeapon.defenseValue;
     }
 
     public void getPlayerImage(){
@@ -128,6 +149,14 @@ public class Player extends Entity{
                 }
             }
 
+            if(keyHandler.enterPressed && !attackCanceled){
+                attacking = true;
+                spriteCounter = 0;
+            }
+
+            attackCanceled = false;
+            gp.keyHandler.enterPressed = false;
+
             spriteCounter++;
             if (spriteCounter > 15) {
                 if (spriteNum == 1) {
@@ -160,7 +189,11 @@ public class Player extends Entity{
         if(monsterIndex != -1){
             if(!invincible) {
                 gp.playSE(6);
-                life -= 1;
+                int damage = gp.monster[monsterIndex].attack - defense;
+                if(damage < 0){
+                    damage = 0;
+                }
+                life -= damage;
                 invincible = true;
             }
         }
@@ -212,14 +245,39 @@ public class Player extends Entity{
         if(monsterIndex != -1){
            if(!gp.monster[monsterIndex].invincible){
                gp.playSE(5);
-               gp.monster[monsterIndex].life -= 1;
+               int damage = attack - gp.monster[monsterIndex].defense;
+               if(damage < 0){
+                   damage = 0;
+               }
+               gp.monster[monsterIndex].life -= damage;
+               gp.ui.addMessage(damage + " damage!");
+
                gp.monster[monsterIndex].invincible = true;
                gp.monster[monsterIndex].damageReaction();
 
                if(gp.monster[monsterIndex].life <= 0){
                    gp.monster[monsterIndex].dying = true;
+                   gp.ui.addMessage("Killed the " + gp.monster[monsterIndex].name + "!");
+                   gp.ui.addMessage("Exp " + gp.monster[monsterIndex].exp);
+                   exp += gp.monster[monsterIndex].exp;
+                   checkLevelUp();
                }
            }
+        }
+    }
+
+    private void checkLevelUp() {
+        if(exp >= nextLevelExp){
+            level++;
+            nextLevelExp *= 2;
+            maxLife += 2;
+            strength++;
+            dexterity++;
+            attack = getAttack();
+            defense = getDefense();
+            gp.playSE(8);
+            gp.gameState = gp.dialogState;
+            gp.ui.currentDialogue = "You are level " + level + " now!\n" + "You feel stronger!";
         }
     }
 
@@ -233,11 +291,9 @@ public class Player extends Entity{
         // When Player hits a NPC
         if(gp.keyHandler.enterPressed) {
             if (index != -1) {
+                attackCanceled = true;
                 gp.gameState = gp.dialogState;
                 gp.npc[index].speak();
-                gp.keyHandler.enterPressed = false;
-            }else{
-                attacking = true;
             }
         }
     }

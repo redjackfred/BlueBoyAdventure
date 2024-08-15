@@ -95,11 +95,14 @@ public class EventHandler {
             gp.gameState = gameState;
             gp.ui.currentDialogue = "You drink the water.\nYour life has been recovered.";
             gp.player.life = gp.player.maxLife;
+            gp.playSE(2);
+            gp.player.attackCanceled = true;
+            gp.assetSetter.setMonster();
         }
-        gp.keyHandler.enterPressed = false;
     }
     public void damagePit(int col, int row, int gameState){
         gp.gameState = gameState;
+        gp.playSE(6);
         gp.ui.currentDialogue = "You fall into a pit!";
         gp.player.life--;
         eventRect[row][col].eventDone = true;

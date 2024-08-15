@@ -49,6 +49,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int pauseState = 2;
     public final int dialogState = 3;
     public final int titleState = 0;
+    public final int characterState = 4;
 
 
     public int getMaxScreenCol() {
@@ -186,7 +187,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         // Debug
         long drawStart = 0;
-        if(keyHandler.checkDrawTime) {
+        if(keyHandler.showDebugText) {
             drawStart = System.nanoTime();
         }
 
@@ -235,12 +236,26 @@ public class GamePanel extends JPanel implements Runnable{
             ui.draw(g2);
         }
 
-        if(keyHandler.checkDrawTime) {
+        if(keyHandler.showDebugText) {
             long drawEnd = System.nanoTime();
             long passedTime = drawEnd - drawStart;
+
+            g2.setFont(new Font("Arial", Font.PLAIN, 20));
             g2.setColor(Color.white);
-            g2.drawString("Draw Time: " + passedTime, 10, 400);
-            System.out.println("Draw Time: " + passedTime);
+            int x = 10;
+            int y = 400;
+            int lineHeight = 20;
+
+            g2.drawString("WorldX: " + player.worldX, x, y);
+            y += lineHeight;
+            g2.drawString("WorldY: " + player.worldY, x, y);
+            y += lineHeight;
+            g2.drawString("Col: " + (player.worldX + player.solidArea.x) / tileSize, x, y);
+            y += lineHeight;
+            g2.drawString("Row: " + (player.worldY + player.solidArea.y) / tileSize, x, y);
+            y += lineHeight;
+            g2.drawString("Draw Time: " + passedTime, x, y);
+
         }
 
         // To save some memory usage
