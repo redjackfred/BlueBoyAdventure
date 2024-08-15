@@ -1,6 +1,8 @@
 package main;
 
+import object.OBJ_Heart;
 import object.OBJ_Key;
+import object.SuperObject;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -11,6 +13,7 @@ import java.text.DecimalFormat;
 public class UI {
     GamePanel gamePanel;
     Graphics2D g2;
+    BufferedImage heart_full, heart_half, heart_blank;
     public boolean messageOn = false;
     public String message = "";
     int messageCounter = 0;
@@ -33,6 +36,12 @@ public class UI {
         }catch (FontFormatException e){
             e.printStackTrace();
         }
+
+        // Create HUD object
+        SuperObject heart = new OBJ_Heart(gamePanel);
+        heart_full = heart.image;
+        heart_half = heart.image2;
+        heart_blank = heart.image3;
     }
 
     public void showMessage(String text){
@@ -49,12 +58,27 @@ public class UI {
             drawTitleScreen();
         }else if(gamePanel.gameState == gamePanel.playState){
             // Do playState stuff later
+            drawPlayerLife();
             drawPlayScreen();
         }else if(gamePanel.gameState == gamePanel.pauseState){
+            drawPlayerLife();
             drawPauseScreen();
         }else if(gamePanel.gameState == gamePanel.dialogState){
+            drawPlayerLife();
             drawDialogueScreen();
         }
+    }
+
+    public void drawPlayerLife(){
+        int x = gamePanel.tileSize / 2;
+        int y = gamePanel.tileSize / 2;
+        int i = 0;
+        while(i < gamePanel.player.maxLife / 2){
+            g2.drawImage(heart_blank, x, y, null);
+            i++;
+            x += gamePanel.tileSize;
+        }
+
     }
 
     public void drawTitleScreen(){
