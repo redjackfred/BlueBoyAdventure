@@ -33,7 +33,58 @@ public class KeyHandler implements KeyListener {
             dialogueState(code);
         }else if(gp.gameState == gp.characterState){
             characterState(code);
+        }else if(gp.gameState == gp.optionState){
+            optionState(code);
         }
+    }
+
+    private void optionState(int code) {
+        if(code == KeyEvent.VK_ESCAPE){
+            gp.gameState = gp.playState;
+        }
+
+        if (code == KeyEvent.VK_W) {
+            gp.ui.commandNum--;
+            gp.playSE(9);
+            if (gp.ui.commandNum < 0) {
+                gp.ui.commandNum = 4;
+            }
+        }
+        if (code == KeyEvent.VK_S) {
+            gp.ui.commandNum++;
+            gp.playSE(9);
+            if (gp.ui.commandNum > 4) {
+                gp.ui.commandNum = 0;
+            }
+        }
+        if (code == KeyEvent.VK_A) {
+            if(gp.ui.subState == 0){
+                if(gp.ui.commandNum == 0 && gp.music.volumnScale > 0){
+                    gp.music.volumnScale--;
+                    gp.music.checkVolumn();
+                    gp.playSE(9);
+                }else if(gp.ui.commandNum == 1 && gp.music.volumnScale > 0){
+                    gp.soundEffect.volumnScale--;
+                    gp.playSE(9);
+                }
+            }
+        }
+        if (code == KeyEvent.VK_D) {
+            if(gp.ui.subState == 0){
+                if(gp.ui.commandNum == 0 && gp.music.volumnScale < 5){
+                    gp.music.volumnScale++;
+                    gp.music.checkVolumn();
+                    gp.playSE(9);
+                }else if(gp.ui.commandNum == 1 && gp.music.volumnScale < 5){
+                    gp.soundEffect.volumnScale++;
+                    gp.playSE(9);
+                }
+            }
+        }
+        if (code == KeyEvent.VK_ENTER) {
+            enterPressed = true;
+        }
+
     }
 
     public void titleState(int code){
@@ -133,6 +184,9 @@ public class KeyHandler implements KeyListener {
                 break;
             case KeyEvent.VK_F:
                 shotKeyPressed = true;
+                break;
+            case KeyEvent.VK_ESCAPE:
+                gp.gameState = gp.optionState;
                 break;
             case KeyEvent.VK_R:
                 gp.tileManager.loadMap("maps/worldmap.txt");

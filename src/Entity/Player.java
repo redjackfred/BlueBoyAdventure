@@ -55,6 +55,9 @@ public class Player extends Entity{
         level = 1;
         maxLife = 6;
         life = maxLife;
+        maxMana = 4;
+        mana = maxMana;
+        ammo = 10;
         strength = 1; // The more strength he has, the more damage he gives.
         dexterity = 1; // The more dexterity he has, the less he receives.
         exp = 0;
@@ -151,6 +154,9 @@ public class Player extends Entity{
             int monsterIndex = gp.collisionChecker.checkEntity(this, gp.monster);
             contactMonster(monsterIndex);
 
+            // Check interactive tile collision
+            int iTileIndex = gp.collisionChecker.checkEntity(this, gp.iTile);
+
             // Check Event
             gp.eventHandler.checkEvent();
 
@@ -198,9 +204,12 @@ public class Player extends Entity{
             }
         }
 
-        if(gp.keyHandler.shotKeyPressed && !projectile.alive && shotAvailableCounter == 30){
+        if(gp.keyHandler.shotKeyPressed && !projectile.alive && shotAvailableCounter == 30 && projectile.haveResource(this)){
             // Set default coordinates, direction, and user
             projectile.set(worldX, worldY, direction, true, this);
+
+            // Subtract the cost (mana)
+            projectile.substractResource(this);
 
             // Add it to the list
             gp.projectileList.add(projectile);
@@ -220,6 +229,13 @@ public class Player extends Entity{
 
         if(shotAvailableCounter < 30){
             shotAvailableCounter++;
+        }
+
+        if(life > maxLife){
+            life = maxLife;
+        }
+        if(mana > maxMana){
+            mana = maxMana;
         }
     }
 
@@ -266,6 +282,9 @@ public class Player extends Entity{
             int monsterIndex = gp.collisionChecker.checkEntity(this, gp.monster);
             damageMonster(monsterIndex, attack);
 
+            int iTileIndex = gp.collisionChecker.checkEntity(this, gp.iTile);
+            damageInteractiveTile(iTileIndex);
+
             // After checking collision, restore the original data
             worldX = currentWorldX;
             worldY = currentWorldY;
@@ -276,6 +295,20 @@ public class Player extends Entity{
             spriteNum = 1;
             spriteCounter = 0;
             attacking = false;
+        }
+    }
+
+    private void damageInteractiveTile(int iTileIndex) {
+        if(iTileIndex != -1 && gp.iTile[iTileIndex].destructible &&
+                gp.iTile[iTileIndex].isCorrectItem(this) && !gp.iTile[iTileIndex].invincible){
+            gp.iTile[iTileIndex].playSE();
+            gp.iTile[iTileIndex].life--;
+            gp.iTile[iTileIndex].invincible = true;
+            generateParticle(gp.iTile[iTileIndex], gp.iTile[iTileIndex]);
+
+            if(gp.iTile[iTileIndex].life == 0) {
+                gp.iTile[iTileIndex] = gp.iTile[iTileIndex].getDestroyedForm();
+            }
         }
     }
 
@@ -340,17 +373,25 @@ public class Player extends Entity{
     }
 
     public void pickUpObject(int objIndex){
-        if(objIndex != -1) {
-            String text;
-            if(inventory.size() != maxInventorySize){
-                inventory.add(gp.obj[objIndex]);
-                gp.playSE(1);
-                text = "Got a " + gp.obj[objIndex].name + "!";
+        if (objIndex != -1) {
+            // Pickup only items
+            if(gp.obj[objIndex].type == type_pickUpOnly){
+                gp.obj[objIndex].use(this);
                 gp.obj[objIndex] = null;
-            }else{
-                text = "You cannot carry any more!";
             }
-            gp.ui.addMessage(text);
+            // Inventory items
+            else {
+                String text;
+                if (inventory.size() != maxInventorySize) {
+                    inventory.add(gp.obj[objIndex]);
+                    gp.playSE(1);
+                    text = "Got a " + gp.obj[objIndex].name + "!";
+                    gp.obj[objIndex] = null;
+                } else {
+                    text = "You cannot carry any more!";
+                }
+                gp.ui.addMessage(text);
+            }
         }
     }
 

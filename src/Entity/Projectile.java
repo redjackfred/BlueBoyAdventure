@@ -24,6 +24,14 @@ public class Projectile extends Entity{
             int monsterIndex = gp.collisionChecker.checkEntity(this, gp.monster);
             if(monsterIndex != -1){
                 gp.player.damageMonster(monsterIndex, attack);
+                generateParticle(user.projectile, gp.monster[monsterIndex]);
+                alive = false;
+            }
+        }else{
+            boolean contactPlayer = gp.collisionChecker.checkPlayer(this);
+            if(!gp.player.invincible && contactPlayer){
+                damagePlayer(attack);
+                generateParticle(user.projectile, gp.player);
                 alive = false;
             }
         }
@@ -50,4 +58,10 @@ public class Projectile extends Entity{
             spriteCounter = 0;
         }
     }
+
+    public boolean haveResource(Entity user){
+        return  false;
+    }
+
+    public void substractResource(Entity user){}
 }

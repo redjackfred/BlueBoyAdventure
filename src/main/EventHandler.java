@@ -91,13 +91,14 @@ public class EventHandler {
         gp.player.worldY = gp.tileSize * 10;
     }
     public void healingPool(int col, int row, int gameState){
-        if(gp.keyHandler.enterPressed == true){
+        if(gp.keyHandler.enterPressed){
             gp.gameState = gameState;
             gp.ui.currentDialogue = "You drink the water.\nYour life has been recovered.";
             gp.player.life = gp.player.maxLife;
             gp.playSE(2);
             gp.player.attackCanceled = true;
             gp.assetSetter.setMonster();
+            gp.player.mana = gp.player.maxMana;
         }
     }
     public void damagePit(int col, int row, int gameState){
