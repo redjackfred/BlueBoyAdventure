@@ -212,6 +212,7 @@ public class UI {
         volumnWidth = 24 * gamePanel.soundEffect.volumnScale;
         g2.fillRect(textX, textY, volumnWidth, 24);
 
+        gamePanel.config.saveConfig();
 
     }
 

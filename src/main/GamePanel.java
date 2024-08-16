@@ -33,6 +33,7 @@ public class GamePanel extends JPanel implements Runnable{
     TileManager tileManager = new TileManager(this);
     public EventHandler eventHandler = new EventHandler(this);
     Thread gameThread;
+    Config config = new Config(this);
     public KeyHandler keyHandler = new KeyHandler(this);
     public UI ui = new UI(this);
     Sound music = new Sound();
