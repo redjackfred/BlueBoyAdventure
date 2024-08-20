@@ -6,6 +6,7 @@ import main.UtilityTool;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public abstract class Entity {
     GamePanel gp;
@@ -16,6 +17,8 @@ public abstract class Entity {
     public int solidAreaDefaultX, solidAreaDefaultY;
     public Rectangle solidArea = new Rectangle(0, 0, 48, 48);
     public Rectangle attackArea = new Rectangle(0, 0, 0, 0);
+    public ArrayList<Entity> inventory = new ArrayList<>();
+    public final int maxInventorySize = 20;
 
     // State
     public int worldX, worldY;
@@ -29,6 +32,7 @@ public abstract class Entity {
     public boolean alive = true;
     public boolean dying = false;
     boolean hpBarOn = false;
+    public boolean onPath = false;
 
     // Counter
     public int actionLockCounter = 0;
@@ -64,6 +68,7 @@ public abstract class Entity {
     public String description = "";
     public int useCost;
     public int value;
+    public int price;
 
     // Type
     public int type; // 0 = player, 1 = npc, 2 = monster
@@ -92,6 +97,76 @@ public abstract class Entity {
         return image;
     }
 
+    public void checkCollision(){
+        collisionOn = false;
+        gp.collisionChecker.checkTile(this);
+        gp.collisionChecker.checkObject(this, false);
+        gp.collisionChecker.checkEntity(this, gp.npc);
+        gp.collisionChecker.checkEntity(this, gp.monster);
+        gp.collisionChecker.checkEntity(this, gp.iTile);
+        boolean contactPlayer = gp.collisionChecker.checkPlayer(this);
+        if(this.type == type_monster && contactPlayer && !gp.player.invincible){
+            damagePlayer(attack);
+        }
+    }
+    public void searchPath(int goalCol, int goalRow){
+        int startCol = (worldX + solidArea.x) / gp.tileSize;
+        int startRow = (worldY + solidArea.y) / gp.tileSize;
+
+        gp.pFinder.setNodes(startCol, startRow, goalCol, goalRow, this);
+        if(gp.pFinder.search()){
+            // Next worldX & worldY
+            int nextX = gp.pFinder.pathList.get(0).col * gp.tileSize;
+            int nextY = gp.pFinder.pathList.get(0).row * gp.tileSize;
+
+            int entityLeftX = worldX + solidArea.x;
+            int entityRightX = worldX + solidArea.x + solidArea.width;
+            int entityTopY = worldY + solidArea.y;
+            int entityBottomY = worldY + solidArea.y + solidArea.height;
+
+            if(entityTopY > nextY && entityLeftX >= nextX && entityRightX < nextX + gp.tileSize){
+                direction = "up";
+            }else if(entityTopY < nextY && entityLeftX >= nextX && entityRightX < nextX + gp.tileSize){
+                direction = "down";
+            }else if(entityTopY >= nextY && entityBottomY < nextY + gp.tileSize){
+                if(entityLeftX > nextX){
+                    direction = "left";
+                }else if(entityLeftX < nextX){
+                    direction = "right";
+                }
+            }else if(entityTopY > nextY && entityLeftX > nextX){
+               direction = "up";
+               checkCollision();
+               if(collisionOn){
+                   direction = "left";
+               }
+            }else if(entityTopY > nextY && entityLeftX < nextX){
+                direction = "up";
+                checkCollision();
+                if(collisionOn){
+                    direction = "right";
+                }
+            }else if(entityTopY < nextY && entityLeftX > nextX){
+                direction = "down";
+                checkCollision();
+                if(collisionOn){
+                    direction = "left";
+                }
+            }else if(entityTopY < nextY && entityLeftX < nextX){
+                direction = "down";
+                checkCollision();
+                if(collisionOn){
+                    direction = "right";
+                }
+            }
+
+            int nextCol = gp.pFinder.pathList.get(0).col;
+            int nextRow = gp.pFinder.pathList.get(0).row;
+            if(nextCol == goalCol && nextRow == goalRow){
+                onPath = false;
+            }
+        }
+    }
     public void setAction(){}
     public void damageReaction(){}
     public void speak(){
@@ -123,9 +198,9 @@ public abstract class Entity {
     public void dropItem(Entity droppedItem){
         for(int i = 0; i < gp.obj.length; i++){
             if(gp.obj[i] == null){
-                gp.obj[i] = droppedItem;
-                gp.obj[i].worldX = worldX;
-                gp.obj[i].worldY = worldY;
+                gp.obj[gp.currentMap][i] = droppedItem;
+                gp.obj[gp.currentMap][i].worldX = worldX;
+                gp.obj[gp.currentMap][i].worldY = worldY;
                 break;
             }
         }
@@ -169,16 +244,7 @@ public abstract class Entity {
 
     public void update(){
         setAction();
-        collisionOn = false;
-        gp.collisionChecker.checkTile(this);
-        gp.collisionChecker.checkObject(this, false);
-        gp.collisionChecker.checkEntity(this, gp.npc);
-        gp.collisionChecker.checkEntity(this, gp.monster);
-        gp.collisionChecker.checkEntity(this, gp.iTile);
-        boolean contactPlayer = gp.collisionChecker.checkPlayer(this);
-        if(this.type == type_monster && contactPlayer && !gp.player.invincible){
-            damagePlayer(attack);
-        }
+        checkCollision();
 
         // If collision is false, player can move
         if(!collisionOn){
@@ -199,7 +265,7 @@ public abstract class Entity {
         }
 
         spriteCounter++;
-        if (spriteCounter > 15) {
+        if (spriteCounter > 20) {
             if (spriteNum == 1) {
                 spriteNum = 2;
             } else if (spriteNum == 2) {

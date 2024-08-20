@@ -15,17 +15,19 @@ import java.text.DecimalFormat;
 public class TileManager {
     GamePanel gamePanel;
     public Tile[] tiles;
-    public int[][] mapTileNum;
+    public int[][][] mapTileNum;
 
     public TileManager(GamePanel gamePanel){
         this.gamePanel = gamePanel;
         tiles = new Tile[39];
-        mapTileNum = new int[gamePanel.getMaxWorldRow()][gamePanel.getMaxWorldCol()];
+        mapTileNum = new int[gamePanel.maxMap][gamePanel.getMaxWorldRow()][gamePanel.getMaxWorldCol()];
+
         getTileImage();
-        loadMap("maps/worldmap.txt");
+        loadMap("maps/worldmap.txt", 0);
+        loadMap("maps/indoor01.txt", 1);
     }
 
-    public void loadMap(String filePath){
+    public void loadMap(String filePath, int map){
         try{
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -37,7 +39,7 @@ public class TileManager {
                 String numbers[] = line.split(" ");
                 while(col < gamePanel.getMaxWorldCol()) {
                     int num = Integer.parseInt(numbers[col]);
-                    mapTileNum[row][col] = num;
+                    mapTileNum[map][row][col] = num;
                     col++;
                 }
                 col = 0;
@@ -53,8 +55,10 @@ public class TileManager {
     public void getTileImage() {
         boolean collision = false;
         for(int i = 0; i < 38; i++){
-            if(i >= 16){
+            if((i >= 16 && i <= 32)|| i == 35){
                 collision = true;
+            }else{
+                collision = false;
             }
             setUp(i, String.format("%03d", i), collision);
         }
@@ -78,7 +82,7 @@ public class TileManager {
 
 
         while(worldCol < gamePanel.getMaxWorldCol() && worldRow < gamePanel.getMaxWorldRow()){
-            int tileNum = mapTileNum[worldRow][worldCol];
+            int tileNum = mapTileNum[gamePanel.currentMap][worldRow][worldCol];
             int worldX = worldCol * gamePanel.tileSize;
             int worldY = worldRow * gamePanel.tileSize;
             int screenX = worldX - gamePanel.player.worldX + gamePanel.player.screenX;
