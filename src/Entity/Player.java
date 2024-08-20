@@ -404,7 +404,7 @@ public class Player extends Entity{
                     inventory.add(gp.obj[gp.currentMap][objIndex]);
                     gp.playSE(1);
                     text = "Got a " + gp.obj[gp.currentMap][objIndex].name + "!";
-                    gp.obj[objIndex] = null;
+                    gp.obj[gp.currentMap][objIndex] = null;
                 } else {
                     text = "You cannot carry any more!";
                 }
